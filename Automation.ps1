@@ -32,6 +32,115 @@ function Start-AutopilotEnrolment {
     $OutputFile = "X:\Autopilot\$SerialNumber.CSV"
     X:\Autopilot\Create_4kHash_using_OA3_Tool.ps1 -GroupTag $GroupTag -OutputFile $OutputFile
     ## NOT FINISHED - NEED TO EITHER GET IT TO ASK THE USER WHERE TO SAVE THE OUTPUT FILE, OR AUTOMATE IT UPLOADING
+    Write-Host "Creation of Autopilot CSV file succeeded!"
+    Write-Host "Starting Upload to Intune now via MS Graph. Please login with an account that has the ability to enrol devices to Autopilot."
+    Start-AutopilotGraphUpload
+    }
+
+function Start-AutopilotGraphUpload {
+
+  # PowerShell Script to Import AutoPilot CSV via Microsoft Graph
+
+    # Function to connect to Microsoft Graph
+    function Connect-Graph {
+        $scopes = "DeviceManagementServiceConfig.ReadWrite.All"
+
+        try {
+            Connect-MgGraph -Scopes $scopes
+            Write-Host "Connected to Microsoft Graph." -ForegroundColor Green
+        } catch {
+            Write-Host "Error connecting to Microsoft Graph: $_" -ForegroundColor Red
+            exit
+        }
+    }
+
+    # Function to read and format AutoPilot CSV data
+    function Get-AutoPilotData {
+        param (
+            [string]$CsvPath
+        )
+
+        try {
+            $csvData = Import-Csv -Path $CsvPath -Encoding UTF8
+            $deviceList = @()
+
+            foreach ($row in $csvData) {
+                $hardwareIdentifierBase64 = if ([string]::IsNullOrWhiteSpace($row."Hardware Hash")) {
+                    "" # Leave empty if no hardware hash
+                } else {
+                    $bytes = [System.Convert]::FromBase64String($row."Hardware Hash")
+                    [System.Convert]::ToBase64String($bytes)
+                }
+
+                $deviceObj = @{
+                    "@odata.type" = "#microsoft.graph.importedWindowsAutopilotDeviceIdentity"
+                    groupTag = $row."Group Tag"
+                    serialNumber = $row."Device Serial Number"
+                    productKey = if ($row."Windows Product ID") { $row."Windows Product ID" } else { $null }
+                    hardwareIdentifier = $hardwareIdentifierBase64
+                }
+                $deviceList += $deviceObj
+            }
+
+            return $deviceList | ConvertTo-Json -Depth 10
+        } catch {
+            Write-Host "Error reading CSV file: $_" -ForegroundColor Red
+            exit
+        }
+    }
+
+
+
+
+    # Function to upload data to Intune via Microsoft Graph
+    function Upload-AutoPilotData {
+        param (
+            [string]$JsonData
+        )
+
+        $uri = "https://graph.microsoft.com/v1.0/deviceManagement/importedWindowsAutopilotDeviceIdentities"
+
+        try {
+            $response = Invoke-MgGraphRequest -Method POST -Uri $uri -Body $JsonData -ContentType "application/json"
+            return $response
+        } catch {
+            Write-Host "Error uploading data to Intune: $($_.Exception.Response.StatusCode.Value__) $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "Graph API Response: $($_.Exception.Response.Content.ReadAsStringAsync().Result)" -ForegroundColor Red
+            exit
+        }
+    }
+
+
+    # Main script execution
+    function Main {
+        # Connect to Microsoft Graph
+        Connect-Graph
+
+        # Modify the path to your AutoPilot CSV file
+        $csvPath = "E:\Test2.csv"
+    
+        # Get and format AutoPilot data
+        $jsonData = Get-AutoPilotData -CsvPath $csvPath
+
+        # Print JSON Payload for debugging (Remove in production)
+        Write-Host "JSON Payload: $jsonData" -ForegroundColor Yellow
+
+        # Upload data to Intune
+        $response = Upload-AutoPilotData -JsonData $jsonData
+
+        # Check response
+        if ($response -ne $null) {
+            Write-Host "AutoPilot data uploaded successfully." -ForegroundColor Green
+        } else {
+            Write-Host "Failed to upload AutoPilot data." -ForegroundColor Red
+        }
+    }
+
+    # Run the script
+    Main
+}
+}
+    
 function Start-BuildSelection {
     Write-Host "Which build would you like to run?"
     Write-Host "1) Internal Build (Automated, will wipe the disk, install $WindowsOSVersion Enterprise, latest drivers and then shutdown"
