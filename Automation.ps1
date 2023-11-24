@@ -1,6 +1,37 @@
 ## Amend this for internal build script e.g. when newer feature update is released - Might be a way to automate pulling through the latest version
 $WindowsOSVersion = "Windows 11 22H2 x64"
 
+function Start-Autopilot {
+
+    Write-Host "Would you like to enrol this device into Autopilot?"
+
+    $APChoice = Read-Host "Y for Yes or N for No"
+
+    if ($APChoice -eq "Y")
+    {
+        Write-Host "Starting Autopilot Process"
+        Start-AutopilotEnrolment
+        Start-BuildSelection
+    }
+    elseif ($APChoice -eq "N")
+    {
+        Write-Host "Skipping Autopilot Enrolment"
+        Start-BuildSelection
+    }
+    else
+    {
+        Write-Host "Invalid selection. Please try again."
+        Start-Autopilot
+    }
+
+function Start-AutopilotEnrolment {
+    $SerialNumber = (Get-WmiObject -Class Win32_BIOS).SerialNumber
+
+    Write-Host "Welcome to Autopilot Enrolment"
+    $GroupTag = Read-Host "Please enter your GroupTag (Case Sensitive)"
+    $OutputFile = "X:\Autopilot\$SerialNumber.CSV"
+    X:\Autopilot\Create_4kHash_using_OA3_Tool.ps1 -GroupTag $GroupTag -OutputFile $OutputFile
+    ## NOT FINISHED - NEED TO EITHER GET IT TO ASK THE USER WHERE TO SAVE THE OUTPUT FILE, OR AUTOMATE IT UPLOADING
 function Start-BuildSelection {
     Write-Host "Which build would you like to run?"
     Write-Host "1) Internal Build (Automated, will wipe the disk, install $WindowsOSVersion Enterprise, latest drivers and then shutdown"
@@ -40,8 +71,6 @@ function Start-BuildSelection {
 
 }
 
-## Functions defined Below ##
-
 function Start-OSDInternal {
 
     ## Install Windows Version listed at top of script, Enterprise, GB language, allow taking screenshots, ZTI so no prompts, skip adding Autopilot profile JSON
@@ -55,8 +84,6 @@ function Start-OSDInternal {
     Start-Sleep -Seconds 3
     wpeutil shutdown
 }
-
-
 
 function Start-OSDWIM {
 
@@ -75,8 +102,6 @@ function Start-OSDWIM {
     wpeutil shutdown
 }
 
-
-
 function Start-TPMAttestationFix {
 
     Write-Host -ForegroundColor Cyan "Adding registry key for TPM attestation fix"
@@ -84,5 +109,6 @@ function Start-TPMAttestationFix {
     Write-Host -ForegroundColor Cyan "Reg key added!"
 }
 
-Write-Host "PowerON Automated Building Process V1.0" -ForegroundColor Yellow
+Write-Host "Automated Building Process V1.0" -ForegroundColor Yellow
+Start-Autopilot
 Start-BuildSelection
