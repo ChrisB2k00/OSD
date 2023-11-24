@@ -220,4 +220,3 @@ function Start-TPMAttestationFix {
 
 Write-Host "Automated Building Process V1.0" -ForegroundColor Yellow
 Start-Autopilot
-Start-BuildSelection
