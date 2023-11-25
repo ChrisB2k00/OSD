@@ -24,6 +24,7 @@ function Start-Autopilot {
         Write-Host "Invalid selection. Please try again." -ForegroundColor Red
         Start-Autopilot
     }
+}
 
 function Start-AutopilotEnrolment {
     $SerialNumber = (Get-WmiObject -Class Win32_BIOS).SerialNumber
@@ -139,7 +140,6 @@ function Start-AutopilotGraphUpload {
 
     # Run the script
     Main
-}
 }
     
 function Start-BuildSelection {
