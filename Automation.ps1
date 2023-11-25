@@ -4,6 +4,7 @@ $WindowsOSVersion = "Windows 11 22H2 x64"
 function Start-Autopilot {
 
     Write-Host "Would you like to enrol this device into Autopilot?" -ForegroundColor Magenta
+    Write-Host "NOTE: If the device is already enrolled in Autopilot. Select NO" -ForegroundColor Yellow
 
     $APChoice = Read-Host "Y for Yes or N for No"
 
