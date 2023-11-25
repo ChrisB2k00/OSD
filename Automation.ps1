@@ -1,3 +1,4 @@
+try {
 ## Amend this for internal build script e.g. when newer feature update is released - Might be a way to automate pulling through the latest version
 $WindowsOSVersion = "Windows 11 22H2 x64"
 
@@ -225,3 +226,9 @@ Write-Host "Automated Building Process V2.0" -ForegroundColor Yellow
 Write-Host "Now includes Autopilot Enrolment!" -ForegroundColor Yellow
 Start-Autopilot
 pause
+
+}
+catch {
+    Write-Host "An error occurred: $_"
+    Read-Host -Prompt "Press Enter to exit"
+}
