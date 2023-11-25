@@ -36,7 +36,9 @@ function Start-AutopilotEnrolment {
     ## NOT FINISHED - NEED TO EITHER GET IT TO ASK THE USER WHERE TO SAVE THE OUTPUT FILE, OR AUTOMATE IT UPLOADING
     Write-Host "Creation of Autopilot CSV file succeeded!" -ForegroundColor Green
     Write-Host "Starting Upload to Intune now via MS Graph. Please login with an account that has the ability to enrol devices to Autopilot." -ForegroundColor Yellow
+    Sleep -Seconds 10
     Start-AutopilotGraphUpload
+    Sleep -Seconds 10
     }
 
 function Start-AutopilotGraphUpload {
@@ -222,3 +224,4 @@ function Start-TPMAttestationFix {
 Write-Host "Automated Building Process V2.0" -ForegroundColor Yellow
 Write-Host "Now includes Autopilot Enrolment!" -ForegroundColor Yellow
 Start-Autopilot
+pause
