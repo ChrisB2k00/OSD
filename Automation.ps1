@@ -12,6 +12,8 @@ function Start-Autopilot {
     if ($APChoice -eq "Y")
     {
         Write-Host "Starting Autopilot Process" -ForegroundColor Yellow
+        Write-Host "Importing required modules" -ForegroundColor Yellow
+        Import-Module Microsoft.Graph.Authentication
         Start-AutopilotEnrolment
         Start-BuildSelection
     }
