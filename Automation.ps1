@@ -120,11 +120,12 @@ function Start-AutopilotGraphUpload {
 
     # Main script execution
     function Main {
+        $SerialNumber = (Get-WmiObject -Class Win32_BIOS).SerialNumber
         # Connect to Microsoft Graph
         Connect-Graph
 
         # Modify the path to your AutoPilot CSV file
-        $csvPath = "E:\Test2.csv"
+        $csvPath = "X:\Autopilot\$SerialNumber.CSV"
     
         # Get and format AutoPilot data
         $jsonData = Get-AutoPilotData -CsvPath $csvPath
@@ -203,7 +204,7 @@ function Start-OSDInternal {
 function Start-OSDWIM {
 
     ## Connect to the shared location for WIM files
-    net use * \\192.168.1.167\OSDCloud /user:Administrator
+    net use * \\IPHERE\OSDCloud /user:Administrator
 
     ## Starts OSDCloud with the parameters to search for WIM files, Skip adding Autopilot profile JSON, Skip ODT, and Zero Touch Installation (No prompts throughout build process)
     Start-OSDCloud -FindImageFile -SkipAutopilot -SkipODT -ZTI
