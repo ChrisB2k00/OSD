@@ -1,3 +1,32 @@
+#####IMPLEMENT THE BELOW, AS IS HOW TO AUTHENTICATE VIA APP ######
+function MgGraph-Authentication {
+    ## App Used is "Autopilot-Registration"
+
+    ## Credetnails required to auth ##
+
+    $ApplicationId = "VALUE" # Application ID found in the overview
+    $SecuredPassword = "VALUE" # Secret VALUE found in Certs & Secrets
+    $tenantID = "VALUE" # Tenant ID found in the overview
+
+    $scopes = "DeviceManagementServiceConfig.ReadWrite.All"
+
+    $SecuredPasswordPassword = ConvertTo-SecureString `
+    -String $SecuredPassword -AsPlainText -Force
+
+    $ClientSecretCredential = New-Object `
+    -TypeName System.Management.Automation.PSCredential `
+    -ArgumentList $ApplicationId, $SecuredPasswordPassword
+
+    try {
+            Connect-MgGraph -TenantId $tenantID -ClientSecretCredential $ClientSecretCredential -Scopes $scopes
+            Write-Host "Connected to Microsoft Graph." -ForegroundColor Green
+        } catch {
+            Write-Host "Error connecting to Microsoft Graph: $_" -ForegroundColor Red
+            exit
+        }
+}
+
+
 try {
 ## Amend this for internal build script e.g. when newer feature update is released - Might be a way to automate pulling through the latest version
 $WindowsOSVersion = "Windows 11 22H2 x64"
