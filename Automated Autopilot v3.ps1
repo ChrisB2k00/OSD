@@ -25,6 +25,8 @@ function MgGraph-Authentication {
 
     } catch {
         Write-Host "Error connecting to graph: $_."
+        Read-Host -Prompt "Press Enter to exit"
+
     }
 
 }
@@ -155,6 +157,7 @@ function Start-AutopilotEnrolment {
             return $deviceList | ConvertTo-Json -Depth 10
         } catch {
             Write-Host "Error reading CSV file: $_" -ForegroundColor Red
+            Read-Host -Prompt "Press Enter to exit"
             exit
         }
     }
@@ -176,6 +179,7 @@ function Start-AutopilotEnrolment {
         } catch {
             Write-Host "Error uploading data to Intune: $($_.Exception.Response.StatusCode.Value__) $($_.Exception.Message)" -ForegroundColor Red
             Write-Host "Graph API Response: $($_.Exception.Response.Content.ReadAsStringAsync().Result)" -ForegroundColor Red
+            Read-Host -Prompt "Press Enter to exit"
             exit
         }
     }
@@ -201,6 +205,7 @@ function Start-AutopilotEnrolment {
             Write-Host "AutoPilot data uploaded successfully." -ForegroundColor Green
         } else {
             Write-Host "Failed to upload AutoPilot data." -ForegroundColor Red
+            Read-Host -Prompt "Press Enter to exit"
         }
     }
 
