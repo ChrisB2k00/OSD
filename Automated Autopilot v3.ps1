@@ -11,7 +11,7 @@ function download-MSGraph {
     Write-Host "Failed to install Microsoft Graph MOdule $_" -ForegroundColor Red
     }
 
-{
+}
 
 function MgGraph-Authentication {
 
