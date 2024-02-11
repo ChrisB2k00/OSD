@@ -18,11 +18,11 @@ function MgGraph-Authentication {
     -TypeName System.Management.Automation.PSCredential `
     -ArgumentList $ApplicationId, $SecuredPasswordPassword
 
-    try {
-        Write-Host "Attempting to connect to Microsoft Graph..."
+    try { 
         Connect-MgGraph -TenantId $tenantID -ClientSecretCredential $ClientSecretCredential -NoWelcome
         Write-Host "Connected successfuly"
         downloadPreReqs
+
     } catch {
         Write-Host "Error connecting to graph: $_."
     }
@@ -52,7 +52,7 @@ function AutopilotDeviceEnrolmentCheck {
     $autopilotRecord = Get-MgDeviceManagementWindowsAutopilotDeviceIdentity | Where-Object serialNumber -eq "$serialNumber" | Select-Object serialNumber, GroupTag, Model, LastContactedDateTime
 
 
-    if ($autopilotRecord = $true) {
+    if ($autopilotRecord) {
         Write-Host "Device is not enrolled. Moving to enrolment step"
         IntuneDeviceCheck
         }
@@ -72,7 +72,7 @@ function IntuneDeviceCheck {
     $serialNumber = (Get-WmiObject -Class Win32_BIOS).SerialNumber
     $intuneRecord = Get-MgDeviceManagementManagedDevice | Where-Object serialNumber -eq "$serialNumber" | Select-Object serialNumber, deviceName, enrolledDateTime, lastSyncDateTime
     
-    if ($intuneRecord = $true) {
+    if ($intuneRecord) {
         $deviceName = Get-MgDeviceManagementManagedDevice | Where-Object serialNumber -eq "$serialNumber" | Select-Object -ExpandProperty deviceName
         Write-Host "Device is in Intune: $deviceName."
         Write-Host "This will be automatically removed in 5 seconds to prevent conflict during Autopilot."
