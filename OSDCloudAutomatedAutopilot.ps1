@@ -19,12 +19,13 @@ function MgGraph-Authentication {
     -ArgumentList $ApplicationId, $SecuredPasswordPassword
 
     try { 
+        Write-Host "Connecting to MS Graph..." -ForegroundColor Cyan
         Connect-MgGraph -TenantId $tenantID -ClientSecretCredential $ClientSecretCredential -NoWelcome
-        Write-Host "Connected successfuly"
+        Write-Host "Connected successfuly" -ForegroundColor Green
         downloadPreReqs
 
     } catch {
-        Write-Host "Error connecting to graph: $_."
+        Write-Host "Error connecting to graph: $_." -ForegroundColor Red
         Read-Host -Prompt "Press Enter to exit"
 
     }
@@ -33,34 +34,34 @@ function MgGraph-Authentication {
 
 function downloadPreReqs {
 
-    Write-Host "Creating path for pre-reqs"
+    Write-Host "Creating path for pre-reqs" -ForegroundColor Cyan
     New-Item -ItemType Directory -Path "X:\Autopilot"
 
-    Write-Host "Downloading Pre-reqs..."
+    Write-Host "Downloading Pre-reqs..." -ForegroundColor Cyan
     Invoke-WebRequest https://raw.githubusercontent.com/ChrisB2k00/OSD/main/OSD%20Autopilot/Create_4kHash_using_OA3_Tool.ps1 -OutFile X:\Autopilot\Create_4kHash_using_OA3_Tool.ps1
     Invoke-WebRequest https://raw.githubusercontent.com/ChrisB2k00/OSD/main/OSD%20Autopilot/OA3.cfg -OutFile X:\Autopilot\OA3.cfg
     Invoke-WebRequest https://raw.githubusercontent.com/ChrisB2k00/OSD/main/OSD%20Autopilot/PCPKsp.dll -OutFile X:\Autopilot\PCPKsp.dll
     Invoke-WebRequest https://raw.githubusercontent.com/ChrisB2k00/OSD/main/OSD%20Autopilot/input.xml -OutFile X:\Autopilot\input.xml
     Invoke-WebRequest https://raw.githubusercontent.com/ChrisB2k00/OSD/main/OSD%20Autopilot/oa3tool.exe -OutFile X:\Autopilot\oa3tool.exe
-    Write-Host "Pre-reqs downloaded!"
+    Write-Host "Pre-reqs downloaded!" -ForegroundColor Green
 
     AutopilotDeviceEnrolmentCheck
 }
 
 function AutopilotDeviceEnrolmentCheck {
     ## Check if the device is already in Autopilot.
-    Write-Host "Checking if device is already enrolled in Autopilot"
+    Write-Host "Checking if device is already enrolled in Autopilot" -ForegroundColor Cyan
     $serialNumber = (Get-WmiObject -Class Win32_BIOS).SerialNumber
     $global:autopilotRecord = Get-MgDeviceManagementWindowsAutopilotDeviceIdentity | Where-Object serialNumber -eq "$serialNumber" | Select-Object serialNumber, GroupTag, Model, LastContactedDateTime
 
 
     if ($autopilotRecord) {
         $enrolledGroupTag = Get-MgDeviceManagementWindowsAutopilotDeviceIdentity | Where-Object serialNumber -eq "$serialNumber" | Select-Object -ExpandProperty GroupTag
-        Write-Host "Device already enrolled with Group Tag: $enrolledGroupTag"
+        Write-Host "Device already enrolled with Group Tag: $enrolledGroupTag" -ForegroundColor Green
         IntuneDeviceCheck
         }
     else {
-        Write-Host "Device is not enrolled. Moving to enrolment step"
+        Write-Host "Device is not enrolled. Moving to enrolment step" -ForegroundColor Yellow
         IntuneDeviceCheck
         }
 
@@ -70,19 +71,19 @@ function AutopilotDeviceEnrolmentCheck {
 function IntuneDeviceCheck {
     ## Check if the device is already in Intune
 
-    Write-Host "Checking if device is in Intune..."
+    Write-Host "Checking if device is in Intune..." -ForegroundColor Cyan
     $serialNumber = (Get-WmiObject -Class Win32_BIOS).SerialNumber
     $intuneRecord = Get-MgDeviceManagementManagedDevice | Where-Object serialNumber -eq "$serialNumber" | Select-Object serialNumber, deviceName, enrolledDateTime, lastSyncDateTime
     
     if ($intuneRecord) {
         $deviceName = Get-MgDeviceManagementManagedDevice | Where-Object serialNumber -eq "$serialNumber" | Select-Object -ExpandProperty deviceName
-        Write-Host "Device is in Intune: $deviceName."
-        Write-Host "This will be automatically removed in 5 seconds to prevent conflict during Autopilot."
+        Write-Host "Device is in Intune: $deviceName." -ForegroundColor Yellow
+        Write-Host "This will be automatically removed in 5 seconds to prevent conflict during Autopilot." -ForegroundColor Yellow
         sleep 5
         removeIntuneRecord
         }
     else {
-        Write-Host "Device is not in Intune. Moving to next step."
+        Write-Host "Device is not in Intune. Moving to next step." -ForegroundColor Green
         if ($autopilotRecord) {
             Start-OSD
             }
@@ -94,15 +95,16 @@ function IntuneDeviceCheck {
 
 function removeIntuneRecord {
     ## Removes Intune record if it exists
-    $serialNumber = "test"
+    $serialNumber = (Get-WmiObject -Class Win32_BIOS).SerialNumber
     $intuneRecord = Get-MgDeviceManagementManagedDevice | Where-Object serialNumber -eq "$serialNumber" | Select-Object serialNumber, deviceName, enrolledDateTime, lastSyncDateTime, Id
     $deviceName = Get-MgDeviceManagementManagedDevice | Where-Object serialNumber -eq "$serialNumber" | Select-Object -ExpandProperty deviceName
     $managedDeviceId = Get-MgDeviceManagementManagedDevice | Where-Object serialNumber -eq "$serialNumber" | Select-Object -ExpandProperty Id
 
 
-    Write-Host "Removing intune record: $deviceName..."
+    Write-Host "Removing intune record: $deviceName..." -ForegroundColor Cyan
     try {
-    Remove-MgDeviceManagementManagedDevice -ManagedDeviceId $managedDeviceId
+        Remove-MgDeviceManagementManagedDevice -ManagedDeviceId $managedDeviceId
+        Write-Host "Device removed successfuly!" -ForegroundColor Green
     } catch {
         Write-Host "Failed to remove device: $_" -ForegroundColor Red
         Write-Host "$deviceName has not been removed. You will need to remove the device manually before Autopilot!" -ForegroundColor Red
@@ -119,7 +121,7 @@ function Start-AutopilotEnrolment {
     ## Grab required details and create Autopilot CSV
     $SerialNumber = (Get-WmiObject -Class Win32_BIOS).SerialNumber
 
-    Write-Host "Welcome to Autopilot Enrolment" -ForegroundColor Yellow
+    Write-Host "Welcome to Autopilot Enrolment" -ForegroundColor Cyan
     
     $GroupTag = Read-Host "Please enter your GroupTag (Case Sensitive)"
     
@@ -127,7 +129,7 @@ function Start-AutopilotEnrolment {
     
     X:\Autopilot\Create_4kHash_using_OA3_Tool.ps1 -GroupTag $GroupTag -OutputFile $OutputFile
     Write-Host "Creation of Autopilot CSV file succeeded!" -ForegroundColor Green
-    Write-Host "Starting Upload to Intune now via MS Graph. Please login with an account that has the ability to enrol devices to Autopilot." -ForegroundColor Yellow
+    Write-Host "Starting Upload to Intune now via MS Graph." -ForegroundColor Cyan
     Sleep -Seconds 10
     Start-AutopilotGraphUpload
     Sleep -Seconds 10
@@ -205,7 +207,7 @@ function Start-AutopilotEnrolment {
         $jsonData = Get-AutoPilotData -CsvPath $csvPath
 
         # Print JSON Payload for debugging (Remove in production)
-        Write-Host "JSON Payload: $jsonData" -ForegroundColor Yellow
+        Write-Host "JSON Payload: $jsonData" -ForegroundColor Magenta
 
         # Upload data to Intune
         $response = Upload-AutoPilotData -JsonData $jsonData
@@ -225,7 +227,7 @@ function Start-AutopilotEnrolment {
 
 function Start-TPMAttestationFix {
     ## Creates registry key to fix TPM attestation error that can sometimes appear during Autopilot
-    Write-Host "Adding registry key for TPM attestation fix" -ForegroundColor Yellow
+    Write-Host "Adding registry key for TPM attestation fix" -ForegroundColor Cyan
     reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\OOBE /v SetupDisplayedEula /t REG_DWORD /d 00000001 /f
     Write-Host "Reg key added!" -ForegroundColor Green
 }
@@ -238,9 +240,11 @@ function Start-OSD {
 
     Start-TPMAttestationFix
 
-    Write-Host "Shutting down in 3 seconds!" -ForegroundColor Yellow
+    Write-Host "Shutting down in 3 seconds!" -ForegroundColor Cyan
     Start-Sleep -Seconds 3
     wpeutil shutdown
 }
 
+
+Write-Host "OSDCloud build automation with Autopilot enrolment" -ForegroundColor Cyan
 MgGraph-Authentication
