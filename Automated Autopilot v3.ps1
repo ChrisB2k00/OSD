@@ -1,4 +1,4 @@
-﻿## This script will check if the device is in Autopilot. If it is, it will print the group tag of the device.
+## This script will check if the device is in Autopilot. If it is, it will print the group tag of the device.
 ## It will then proceed to remove the Intune record if required, then install Windows & drivers
 
 $winVer = "Windows 11 23H2 x64"
@@ -7,11 +7,9 @@ function MgGraph-Authentication {
 
     ## Credetnails required to auth ##
 
-    $ApplicationId = "VALUE" # Application ID found in the overview
-    $SecuredPassword = "VALUE" # Secret VALUE found in Certs & Secrets
-    $tenantID = "VALUE" # Tenant ID found in the overview
-
-    $scopes = "DeviceManagementServiceConfig.ReadWrite.All"
+    $ApplicationId = "84c60813-885f-4a3f-8ecc-b816b3f006be"
+    $SecuredPassword = "Xnr8Q~3Gvp01vjpeeVQlc3Zh6xMeHKgHxoyH.bq1"
+    $tenantID = "90907c93-7590-444c-a8ac-784e854039b4"
 
     $SecuredPasswordPassword = ConvertTo-SecureString `
     -String $SecuredPassword -AsPlainText -Force
@@ -20,15 +18,13 @@ function MgGraph-Authentication {
     -TypeName System.Management.Automation.PSCredential `
     -ArgumentList $ApplicationId, $SecuredPasswordPassword
 
-    try {
-            Write-Host "Connecting to MS Graph..."
-            Connect-MgGraph -TenantId $tenantID -ClientSecretCredential $ClientSecretCredential -Scopes $scopes -NoWelcome
-            Write-Host "Connected to Microsoft Graph." -ForegroundColor Green
-            downloadPreReqs
-        } catch {
-            Write-Host "Error connecting to Microsoft Graph: $_" -ForegroundColor Red
-            exit
-        }
+    try { 
+        Connect-MgGraph -TenantId $tenantID -ClientSecretCredential $ClientSecretCredential -NoWelcome
+
+    } catch {
+        Write-Host "Error connecting to graph: $_."
+    }
+
 }
 
 function downloadPreReqs {
@@ -229,4 +225,5 @@ function Start-OSD {
     Start-Sleep -Seconds 3
     wpeutil shutdown
 }
+
 MgGraph-Authentication
