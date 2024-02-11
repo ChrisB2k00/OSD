@@ -18,9 +18,11 @@ function MgGraph-Authentication {
     -TypeName System.Management.Automation.PSCredential `
     -ArgumentList $ApplicationId, $SecuredPasswordPassword
 
-    try { 
+    try {
+        Write-Host "Attempting to connect to Microsoft Graph..."
         Connect-MgGraph -TenantId $tenantID -ClientSecretCredential $ClientSecretCredential -NoWelcome
-
+        Write-Host "Connected successfuly"
+        downloadPreReqs
     } catch {
         Write-Host "Error connecting to graph: $_."
     }
