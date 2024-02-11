@@ -6,10 +6,6 @@ $winVer = "Windows 11 23H2 x64"
 function MgGraph-Authentication {
 
     ## Credetnails required to auth ##
-    ## Required permissions:
-    ## DeviceManagementManagedDevices.ReadWrite.All
-    ## DeviceManagementServiceConfig.ReadWrite.All
-    ## User.Read
 
     $ApplicationId = "84c60813-885f-4a3f-8ecc-b816b3f006be"
     $SecuredPassword = "Xnr8Q~3Gvp01vjpeeVQlc3Zh6xMeHKgHxoyH.bq1"
@@ -59,12 +55,12 @@ function AutopilotDeviceEnrolmentCheck {
 
 
     if ($autopilotRecord) {
-        Write-Host "Device is not enrolled. Moving to enrolment step"
+        $enrolledGroupTag = Get-MgDeviceManagementWindowsAutopilotDeviceIdentity | Where-Object serialNumber -eq "$serialNumber" | Select-Object -ExpandProperty GroupTag
+        Write-Host "Device already enrolled with Group Tag: $enrolledGroupTag"
         IntuneDeviceCheck
         }
     else {
-        $enrolledGroupTag = Get-MgDeviceManagementWindowsAutopilotDeviceIdentity | Where-Object serialNumber -eq "$serialNumber" | Select-Object -ExpandProperty GroupTag
-        Write-Host "Device already enrolled with Group Tag: $enrolledGroupTag"
+        Write-Host "Device is not enrolled. Moving to enrolment step"
         IntuneDeviceCheck
         }
 
