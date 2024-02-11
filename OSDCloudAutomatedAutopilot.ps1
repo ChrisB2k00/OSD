@@ -51,7 +51,7 @@ function AutopilotDeviceEnrolmentCheck {
     ## Check if the device is already in Autopilot.
     Write-Host "Checking if device is already enrolled in Autopilot"
     $serialNumber = (Get-WmiObject -Class Win32_BIOS).SerialNumber
-    $autopilotRecord = Get-MgDeviceManagementWindowsAutopilotDeviceIdentity | Where-Object serialNumber -eq "$serialNumber" | Select-Object serialNumber, GroupTag, Model, LastContactedDateTime
+    $global:autopilotRecord = Get-MgDeviceManagementWindowsAutopilotDeviceIdentity | Where-Object serialNumber -eq "$serialNumber" | Select-Object serialNumber, GroupTag, Model, LastContactedDateTime
 
 
     if ($autopilotRecord) {
@@ -83,7 +83,12 @@ function IntuneDeviceCheck {
         }
     else {
         Write-Host "Device is not in Intune. Moving to next step."
-        Start-AutopilotEnrolment
+        if ($autopilotRecord) {
+            Start-OSD
+            }
+        else {
+            Start-AutopilotEnrolment
+            }
         }
 }
 
@@ -102,7 +107,12 @@ function removeIntuneRecord {
         Write-Host "Failed to remove device: $_" -ForegroundColor Red
         Write-Host "$deviceName has not been removed. You will need to remove the device manually before Autopilot!" -ForegroundColor Red
     }
-    Start-AutopilotEnrolment
+    if ($autopilotRecord) {
+        Start-OSD
+        }
+    else {
+        Start-AutopilotEnrolment
+        }
 }
 
 function Start-AutopilotEnrolment {
