@@ -3,16 +3,6 @@
 
 $winVer = "Windows 11 23H2 x64"
 
-function download-MSGraph {
-
-    try {
-        Install-Module Microsoft.Graph -Force
-    } catch {
-    Write-Host "Failed to install Microsoft Graph MOdule $_" -ForegroundColor Red
-    }
-
-}
-
 function MgGraph-Authentication {
 
     ## Credetnails required to auth ##
@@ -239,5 +229,4 @@ function Start-OSD {
     Start-Sleep -Seconds 3
     wpeutil shutdown
 }
-download-MSGraph
 MgGraph-Authentication
