@@ -11,7 +11,7 @@ function MgGraph-Authentication {
         
         Write-Host "#######################################################################" -ForegroundColor Green
         Write-Host "## FOLLOW THE INSTRUCTIONS BELOW TO AUTHENTICATE TO BUILD THE DEVICE ##" -ForegroundColor Green
-        Write-Host "#######################################################################" -ForegroundColor Green
+        Write-Host "#######################################################################`n" -ForegroundColor Green
         
         Connect-MgGraph -UseDeviceCode
         Write-Host "Connected successfuly" -ForegroundColor Green
