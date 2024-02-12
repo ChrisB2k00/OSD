@@ -8,7 +8,7 @@ function MgGraph-Authentication {
     ## Credetnails required to auth ##
     try { 
         Write-Host "Connecting to MS Graph..." -ForegroundColor Cyan
-        Connect-MgGraph
+        Connect-MgGraph -UseDeviceCode
         Write-Host "Connected successfuly" -ForegroundColor Green
         downloadPreReqs
 
