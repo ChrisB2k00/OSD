@@ -13,7 +13,7 @@ function Start-TPMAttestationFix {
 function Start-OSD {
 
     ## Install Windows Version listed at top of script, Enterprise, GB language, allow taking screenshots, ZTI so no prompts, skip adding Autopilot profile JSON
-    Start-OSDCloud -OSName "$winVer" -OSEdition Enterprise -OSLanguage en-GB -Screenshot -ZTI -SkipAutopilot
+    Start-OSDCloud -OSName "$winVer" -OSEdition Pro -OSLanguage en-GB -Screenshot -ZTI -SkipAutopilot
     Write-Host "Build complete!" -ForegroundColor Green
 
     Start-TPMAttestationFix
